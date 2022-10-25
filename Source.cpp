@@ -141,7 +141,7 @@ void move_to_dir(string file_name, int hash_val, string dir_name)
 	}
 	else
 	{
-		htable[hash_val].search(htable[hash_val].hnode->file_name);
+		htable[hash_val].search(file_name);
 		search_node->dir = dir_name;
 	}
 }
@@ -155,6 +155,7 @@ void edit_to_file(string f_name, int hash_val, int option)//for reading, editing
 	{
 		if (option == 0)//for reading file
 		{
+			cout << "Enter Reading Option\n 1.Read Sequentially.\n 2.Reading Till Specific Size." << endl;
 			if (r_option == 0)//for reading sequentially
 			{
 				cout << "File Contents:" << endl;
@@ -180,7 +181,7 @@ void edit_to_file(string f_name, int hash_val, int option)//for reading, editing
 			}
 		}
 
-	    if (option == 1)//for writing to file
+		if (option == 1)//for writing to file
 		{
 			cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
 			cin >> w_option;
@@ -203,10 +204,65 @@ void edit_to_file(string f_name, int hash_val, int option)//for reading, editing
 	}
 	else//check chained list
 	{
+		int r_option;
+		int w_option;
+		int read_size;
 
+		search_node = temp_node;
+		htable[hash_val].search(f_name);//assigns search_node with the address of searched file_name
+		if (search_node != temp_node)
+		{
+			if (option == 0)//for reading file
+			{
+				cout << "Enter Reading Option\n 1.Read Sequentially.\n 2.Reading Till Specific Size." << endl;
+				if (r_option == 0)//for reading sequentially
+				{
+					cout << "File Contents:" << endl;
+					if (search_node->data != "*")
+						cout << search_node->data << endl;
+					else
+						cout << "Nothing In File." << endl;
+					cout << endl;
+				}
+				else if (r_option == 1)//for reading till character point
+				{
+					cout << "Enter Size Till Read: " << endl;
+					cin >> read_size;
+					if (search_node->data != "*")
+					{
+						cout << "Enter Size Till Read: " << endl;
+						cin >> read_size;
+						cout << search_node->data.substr(0, read_size) << endl;
+					}
+					else
+						cout << "Nothing In File." << endl;
+					cout << endl;
+				}
+			}
+
+			if (option == 1)//for writing to file
+			{
+				cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
+				cin >> w_option;
+
+				if (w_option == 1)//for overwriting file
+				{
+					cout << "Enter Data to write to file" << endl;
+					string str1 = "";
+					cin >> str1;
+					search_node->data = str1;
+				}
+				else if (w_option == 2)//for appending to file
+				{
+					cout << "Enter Data to append to file" << endl;
+					string str2 = "";
+					cin >> str2;
+					search_node->data = search_node->data + str2;
+				}
+			}
+		}
 	}
 }
-
 int hash_value(string file_name)
 {
 	int sum = 0;
