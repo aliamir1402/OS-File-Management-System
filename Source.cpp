@@ -489,24 +489,31 @@ void PrintMemoryMap()
 	string str = "";
 	node* Dtemp = new node;
 	node* Htemp = new node;
+    Dtemp=temp_node;
 	Dtemp = dlist->start;
 	int i = 0;
+    cout<<"A";
 	while (Dtemp != temp_node)
 	{
+        cout<<"B";
 		for (int j = 0; j < 1024; j++)
 		{
+            cout<<"C";
+            FileNames[i] = Dtemp->data + " : ";
 			if (htable[j].hnode->file_name != "*")
 			{
-				FileNames[i] = Dtemp->dir->data + " : ";
+                cout<<"D";
 				Htemp = htable[j].hnode;
+                cout<<"E";
 				while (Htemp != temp_node)
 				{
-					if (Htemp->dir->data == Dtemp->dir->data)
+                    cout<<"F";
+					if (Htemp->dir->data == Dtemp->data)
 					{
-						FileNames[i] = FileNames[i] + Htemp->file_name;
+                        cout<<"G";
+						FileNames[i] = FileNames[i] + Htemp->file_name+"["+Htemp->data.length()+"]"+"  ";
 					}
 					Htemp = Htemp->nptr;
-					FileNames[i] = FileNames[i] + "  ";
 				}
 			}
 		}
