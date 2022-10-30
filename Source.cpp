@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string.h>
+#include <fstream>
 using namespace std;
 
 void Intialize_Htable();
@@ -113,16 +114,18 @@ public:
 	void delete_node(string fname)
 	{
 		search_node = temp_node;
-		search_node->nptr = temp_node;
-
+		
 		if (start != temp_node)
 		{
 			search(fname);
-			search_node->pptr->nptr = search_node->nptr;
-			search_node->nptr = temp_node;
-			delete search_node;
-			length--;
-			cout << "File Deleted." << endl << endl;
+			if (search_node != temp_node)
+			{
+				search_node->pptr->nptr = search_node->nptr;
+				search_node->nptr = temp_node;
+				delete search_node;
+				length--;
+				cout << "File deleted Successfully." << endl;
+			}
 		}
 	}
 };
@@ -211,6 +214,7 @@ void Delete_File(string f_name, int hash_val)
 		htable[hash_val].hnode->file_name = "*";
 		htable[hash_val].hnode->data = "*";
 		htable[hash_val].hnode->dir = temp_node;
+		cout << "File deleted Successfully." << endl;
 	}
 	else
 	{
@@ -259,11 +263,11 @@ void Insert_Dir(string Dir_Name)
 	if (search_node == temp_node)
 	{
 		dlist->insert(Dir_Name, -1);
-		cout << "File Created Successfully." << endl << endl;
+		cout << "Directory Created Successfully." << endl << endl;
 	}
 	else
 	{
-		cout << "File Has A Repeatative Name." << endl << endl;
+		cout << "Directory Has A Repeatative Name." << endl << endl;
 	}
 }
 void Move_To_Dir(string file_name, int hash_val, string dir_name)
@@ -271,15 +275,12 @@ void Move_To_Dir(string file_name, int hash_val, string dir_name)
 	if (htable[hash_val].hnode->file_name == file_name)
 	{
 		search_node = temp_node;
-		cout << "A";
 		dlist->search_dir(dir_name);
-		cout << "A";
 		if (search_node != temp_node)
 		{
-			cout << "A";
 			htable[hash_val].hnode->dir = search_node;
-			cout << "A";
 			cout << "File changed and moved to " << htable[hash_val].hnode->dir->data << endl;
+			return;
 		}
 	}
 	else
@@ -296,9 +297,11 @@ void Move_To_Dir(string file_name, int hash_val, string dir_name)
 				s_node->dir = search_node;
 				cout << "File changed and moved to " << s_node->dir->data << endl;
 				cout << endl;
+				return;
 			}
 		}
 	}
+	cout << "File or Directory Not Found." << endl << endl;
 }
 void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 {
@@ -442,7 +445,7 @@ void MoveContentWithinFile(string f_name, int from, int to, int size, int hash_v
 				search_node->data.substr(to + 1, search_node->data.length());
 			cout << "File Edited Successfully" << endl << endl;
 		}
-	}	
+	}
 }
 void TruncateFile(string f_name, int size, int hash_val)
 {
@@ -489,29 +492,26 @@ void PrintMemoryMap()
 	string str = "";
 	node* Dtemp = new node;
 	node* Htemp = new node;
-    Dtemp=temp_node;
+	Dtemp = temp_node;
 	Dtemp = dlist->start;
+	string memory;
 	int i = 0;
-    cout<<"A";
+	ofstream MyFile("Assignment.dat");
+
 	while (Dtemp != temp_node)
 	{
-        cout<<"B";
 		for (int j = 0; j < 1024; j++)
 		{
-            cout<<"C";
-            FileNames[i] = Dtemp->data + " : ";
+			FileNames[i] = Dtemp->data + " : ";
 			if (htable[j].hnode->file_name != "*")
 			{
-                cout<<"D";
 				Htemp = htable[j].hnode;
-                cout<<"E";
 				while (Htemp != temp_node)
 				{
-                    cout<<"F";
 					if (Htemp->dir->data == Dtemp->data)
 					{
-                        cout<<"G";
-						FileNames[i] = FileNames[i] + Htemp->file_name+"["+Htemp->data.length()+"]"+"  ";
+						memory = Htemp->data.length();
+						FileNames[i] = FileNames[i] + Htemp->file_name + "[" + memory + "]   ";
 					}
 					Htemp = Htemp->nptr;
 				}
@@ -520,8 +520,15 @@ void PrintMemoryMap()
 		Dtemp = Dtemp->nptr;
 		i++;
 	}
+	cout << endl << "Successfully Written to Dat File." << endl << endl;
+
+
+	// Write to the file
 	for (int x = 0; x < i; x++)
-		cout << FileNames[x] << endl;
+		MyFile << FileNames[x] << endl << "-----" << endl;
+	
+	// Close the file
+	MyFile.close();
 }
 
 
