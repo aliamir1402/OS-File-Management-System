@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <cstring>
 using namespace std;
 
 void Intialize_Htable();
@@ -157,9 +158,8 @@ int main()
 			Insert_File(f_name, hash_val);
 			break;
 		case 2:
-			cout << "Enter File Name to Delete: "; cin >> f_name;
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			Delete_File(f_name, hash_val);
+			cout << "Enter Directory Name: "; cin >> Dir_Name;
+			Insert_Dir(Dir_Name);
 			break;
 		case 3:
 			cout << "Enter File Name to Move: "; cin >> f_name;
@@ -182,8 +182,9 @@ int main()
 			MoveContentWithinFile(f_name, from, to, size, hash_val);
 			break;
 		case 6:
-			cout << "Enter Directory Name: "; cin >> Dir_Name;
-			Insert_Dir(Dir_Name);
+			cout << "Enter File Name to Delete: "; cin >> f_name;
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			Delete_File(f_name, hash_val);
 			break;
 		case 7:
 			cout << "Enter Position To Truncate File: "; cin >> size;
@@ -346,15 +347,18 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 			if (w_option == 1)//for overwriting file
 			{
 				cout << "Enter Data to write to file" << endl;
-				string str1 = "";
-				cin >> str1;
+				char str1[100];
+				fgets(str1, sizeof(str1), stdin);
+				fgets(str1, sizeof(str1), stdin);
 				htable[hash_val].hnode->data = str1;
 			}
 			else if (w_option == 2)//for appending to file
 			{
 				cout << "Enter Data to append to file" << endl;
-				string str2 = "";
-				cin >> str2;
+				char str2[100];
+				fgets(str2, sizeof(str2), stdin);
+				fgets(str2, sizeof(str2), stdin);
+				htable[hash_val].hnode->data = str2;
 				htable[hash_val].hnode->data = htable[hash_val].hnode->data + str2;
 			}
 		}
@@ -405,16 +409,18 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 				if (w_option == 1)//for overwriting file
 				{
 					cout << "Enter Data to write to file" << endl;
-					string str1 = "";
-					cin >> str1;
-					search_node->data = str1;
+					char str1[100];
+					fgets(str1, sizeof(str1), stdin);
+					fgets(str1, sizeof(str1), stdin);
+					htable[hash_val].hnode->data = str1;
 				}
 				else if (w_option == 2)//for appending to file
 				{
 					cout << "Enter Data to append to file" << endl;
-					string str2 = "";
-					cin >> str2;
-					search_node->data = search_node->data + str2;
+					char str2[100];
+					fgets(str2, sizeof(str2), stdin);
+					fgets(str2, sizeof(str2), stdin);
+					htable[hash_val].hnode->data = str2;
 				}
 			}
 		}
@@ -490,6 +496,7 @@ void Intialize_Htable()
 void PrintMemoryMap()
 {
 	string str = "";
+	string temp_string = "";
 	node* Dtemp = new node;
 	node* Htemp = new node;
 	Dtemp = temp_node;
@@ -500,9 +507,9 @@ void PrintMemoryMap()
 
 	while (Dtemp != temp_node)
 	{
+		FileNames[i] = Dtemp->data + ": ";
 		for (int j = 0; j < 1024; j++)
 		{
-			FileNames[i] = Dtemp->data + " : ";
 			if (htable[j].hnode->file_name != "*")
 			{
 				Htemp = htable[j].hnode;
@@ -510,32 +517,35 @@ void PrintMemoryMap()
 				{
 					if (Htemp->dir->data == Dtemp->data)
 					{
-						memory = Htemp->data.length();
-						FileNames[i] = FileNames[i] + Htemp->file_name + "[" + memory + "]   ";
+						memory = FileNames[i];
+						FileNames[i] = memory + Htemp->file_name + "  ";
+						cout << FileNames[i] << endl;
+							//"[" + to_string(Htemp->data.size()) + "]   ";
 					}
-					Htemp = Htemp->nptr;
+						Htemp = Htemp->nptr;
 				}
 			}
 		}
-		Dtemp = Dtemp->nptr;
 		i++;
+		Dtemp = Dtemp->nptr;
 	}
 	cout << endl << "Successfully Written to Dat File." << endl << endl;
 
-
 	// Write to the file
 	for (int x = 0; x < i; x++)
-		MyFile << FileNames[x] << endl << "-----" << endl;
-	
+	{
+		MyFile << FileNames[x];
+		MyFile << endl;
+		MyFile << "-----" << endl;
+	}
 	// Close the file
 	MyFile.close();
 }
 
-
 //Options/Services Available
 void Menu()
 {
-	cout << "---------------Menu----------------\n 1.Create A File.\n 2.Delete A File.\n 3.Move File To Directory\n";
-	cout << " 4.Open A File(For Read or Write).\n 5.Move Contents Within A File.\n 6.Create Directory.\n";
+	cout << "---------------Menu----------------\n 1.Create A File.\n 2.Create Directory.\n 3.Move File To Directory\n";
+	cout << " 4.Open A File(For Read or Write).\n 5.Move Contents Within A File.\n 6.Delete A File.\n";
 	cout << " 7.Trucate a File.\n 8.Write Memory Map To File.\n";
 }
