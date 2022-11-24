@@ -140,9 +140,9 @@ int main()
 	Intialize_Htable();
 	int hash_val = 0;
 	int M_Option = -1;
-	string f_name = "";//from user input
+	char f_name[100];//from user input
 	int conti = 1;
-	string Dir_Name;
+	char Dir_Name[100];
 	int size;
 
 	Menu();
@@ -153,28 +153,33 @@ int main()
 		switch (M_Option)
 		{
 		case 1:
-			cout << "Enter File Name to Create: "; cin >> f_name;
+			cout << "Enter File Name to Create: "; fgets(f_name, sizeof(f_name), stdin);
+			fgets(f_name, sizeof(f_name), stdin);
 			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
 			Insert_File(f_name, hash_val);
 			break;
 		case 2:
-			cout << "Enter Directory Name: "; cin >> Dir_Name;
+			cout << "Enter Directory Name: "; fgets(Dir_Name, sizeof(Dir_Name), stdin);
+			fgets(Dir_Name, sizeof(Dir_Name), stdin);
 			Insert_Dir(Dir_Name);
 			break;
 		case 3:
-			cout << "Enter File Name to Move: "; cin >> f_name;
+			cout << "Enter File Name to Move: ";  fgets(f_name, sizeof(f_name), stdin);
+			fgets(f_name, sizeof(f_name), stdin);
 			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			cout << "Enter Directory Name To Move: "; cin >> Dir_Name;
+			cout << "Enter Directory Name To Move: "; fgets(Dir_Name, sizeof(Dir_Name), stdin);
 			Move_To_Dir(f_name, hash_val, Dir_Name);
 			break;
 		case 4:
-			cout << "Enter File Name to Change: "; cin >> f_name;
+			cout << "Enter File Name to Change: ";  fgets(f_name, sizeof(f_name), stdin);
+			fgets(f_name, sizeof(f_name), stdin);
 			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
 			Edit_To_File(f_name, hash_val);
 			break;
 		case 5:
 			int from, to;
-			cout << "Enter File Name to Change: "; cin >> f_name;
+			cout << "Enter File Name to Change: ";  fgets(f_name, sizeof(f_name), stdin);
+			fgets(f_name, sizeof(f_name), stdin);
 			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
 			cout << "Start Selection From(Position): "; cin >> from;
 			cout << "Limit Value To Be Changed "; cin >> size;
@@ -182,13 +187,15 @@ int main()
 			MoveContentWithinFile(f_name, from, to, size, hash_val);
 			break;
 		case 6:
-			cout << "Enter File Name to Delete: "; cin >> f_name;
+			cout << "Enter File Name to Delete: ";  fgets(f_name, sizeof(f_name), stdin);
+			fgets(f_name, sizeof(f_name), stdin);
 			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
 			Delete_File(f_name, hash_val);
 			break;
 		case 7:
 			cout << "Enter Position To Truncate File: "; cin >> size;
-			cout << "Enter File Name to Create: "; cin >> f_name;
+			cout << "Enter File Name to Create: ";  fgets(f_name, sizeof(f_name), stdin);
+			fgets(f_name, sizeof(f_name), stdin);
 			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
 			TruncateFile(f_name, size, hash_val);
 			break;
@@ -358,7 +365,6 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 				char str2[100];
 				fgets(str2, sizeof(str2), stdin);
 				fgets(str2, sizeof(str2), stdin);
-				htable[hash_val].hnode->data = str2;
 				htable[hash_val].hnode->data = htable[hash_val].hnode->data + str2;
 			}
 		}
@@ -420,7 +426,7 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 					char str2[100];
 					fgets(str2, sizeof(str2), stdin);
 					fgets(str2, sizeof(str2), stdin);
-					htable[hash_val].hnode->data = str2;
+					htable[hash_val].hnode->data = htable[hash_val].hnode->data + str2;
 				}
 			}
 		}
@@ -541,7 +547,6 @@ void PrintMemoryMap()
 	// Close the file
 	MyFile.close();
 }
-
 //Options/Services Available
 void Menu()
 {
