@@ -1,20 +1,143 @@
 #include <iostream>
 #include <string.h>
+#include<string>
 #include <fstream>
 #include <cstring>
+#include <thread>
+#include <time.h>
 using namespace std;
+
+#define MAX_THREAD 4
+
 
 void Intialize_Htable();
 void Delete_File(string f_name, int hash_val);
 void Insert_File(string f_name, int hash_val);
 void Move_To_Dir(string file_name, int hash_val, string dir_name);
-void Edit_To_File(string f_name, int hash_val);
+void Edit_To_File(string f_name, int hash_val, string);
 void MoveContentWithinFile(string f_name, int from, int to, int size, int hash_val);
 void TruncateFile(string f_name, int size, int hash_val);
 int Hash_Value(string file_name);
 void Insert_Dir(string Dir_Name);
 void PrintMemoryMap();
+int ConvertToOption(string);
 void Menu();
+
+void* sum_array(void* arg)
+{
+	int hash_val = 0;
+	int M_Option = -1;
+	string f_name = "";//from user input
+	int conti = 1;
+	string Dir_Name = "";
+	int size = 0;
+	char line[100];
+	string word = "";
+	char* next_token1 = NULL;
+	int count = 0;
+	int from;
+	int to;
+
+	fstream  afile;
+	afile.open("command1.txt", ios::in);
+
+	cout << "Home directory created." << endl;
+	Insert_Dir("home");
+
+	do
+	{
+		afile >> line;
+		count++;
+		cout << "------------------------Command: " << count << "---------------------------" << endl;
+		cout << "Line: " << line << endl;
+		word = strtok_s(line, ",", &next_token1);
+		//cout << "Line: " << word << endl << endl;
+		M_Option = ConvertToOption(word);
+
+		cout << endl;
+		//cout << "Select Any Option: "; cin >> M_Option;
+
+		switch (M_Option)
+		{
+		case 1:
+			//cout << "Enter File Name to Create: "; fgets(f_name, sizeof(f_name), stdin);
+			//fgets(f_name, sizeof(f_name), stdin);
+			f_name = strtok_s(NULL, ",", &next_token1);
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			Insert_File(f_name, hash_val);
+			Move_To_Dir(f_name, hash_val, "home");
+			break;
+		case 2:
+			//cout << "Enter Directory Name: "; fgets(Dir_Name, sizeof(Dir_Name), stdin);
+			//fgets(Dir_Name, sizeof(Dir_Name), stdin);
+			Dir_Name = strtok_s(NULL, ",", &next_token1);
+			Insert_Dir(Dir_Name);
+			break;
+		case 3:
+			//cout << "Enter File Name to Move: ";  fgets(f_name, sizeof(f_name), stdin);
+			//fgets(f_name, sizeof(f_name), stdin);
+			f_name = strtok_s(NULL, ",", &next_token1);
+			Dir_Name = strtok_s(NULL, ",", &next_token1);
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			//cout << "Enter Directory Name To Move: "; fgets(Dir_Name, sizeof(Dir_Name), stdin);
+			Move_To_Dir(f_name, hash_val, Dir_Name);
+			break;
+		case 4:
+			//cout << "Enter File Name to Change: ";  fgets(f_name, sizeof(f_name), stdin);
+			//fgets(f_name, sizeof(f_name), stdin);
+			f_name = strtok_s(NULL, ",", &next_token1);
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			Edit_To_File(f_name, hash_val, strtok_s(NULL, ",", &next_token1));
+			break;
+		case 5:
+			from = 0;
+			to = 0;
+			size = 0;
+			//cout << "Enter File Name to Change: ";  fgets(f_name, sizeof(f_name), stdin);
+			//fgets(f_name, sizeof(f_name), stdin);
+			f_name = strtok_s(NULL, ",", &next_token1);
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			//cout << "Start Selection From(Position): "; cin >> from;
+			from = std::stoi(strtok_s(NULL, ",", &next_token1));
+			//cout << "From: " << from << endl;
+			//cout << "Limit Value To Be Changed "; cin >> size;
+			size = std::stoi(strtok_s(NULL, ",", &next_token1));
+			//cout << "Size: " << size << endl;
+			//cout << "New Postion To Be Placed: "; cin >> to;
+			to = std::stoi(strtok_s(NULL, ",", &next_token1));
+			//cout << "To: " << to << endl;
+			MoveContentWithinFile(f_name, from, to, size, hash_val);
+			break;
+		case 6:
+			//cout << "Enter File Name to Delete: ";  fgets(f_name, sizeof(f_name), stdin);
+			//fgets(f_name, sizeof(f_name), stdin);
+			f_name = strtok_s(NULL, ",", &next_token1);
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			Delete_File(f_name, hash_val);
+			break;
+		case 7:
+			//cout << "Enter Position To Truncate File: "; cin >> size;
+			//cout << "Enter File Name to Create: ";  fgets(f_name, sizeof(f_name), stdin);
+			//fgets(f_name, sizeof(f_name), stdin);
+			f_name = strtok_s(NULL, ",", &next_token1);
+			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
+			TruncateFile(f_name, int(strtok_s(NULL, ",", &next_token1)), hash_val);
+			break;
+		case 8:
+			PrintMemoryMap();
+			break;
+		default:
+			cout << "Unavailable Option Selected." << endl;
+		}
+		//system("pause");
+		//cout << endl;
+
+		//Menu();
+		//cout << endl;		
+		//cout << "Select Any Option: "; cin >> M_Option;
+	} while (!afile.eof());
+	afile.close();
+}
 
 class node
 {
@@ -138,79 +261,9 @@ linkedlist* dlist = new linkedlist;
 int main()
 {
 	Intialize_Htable();
-	int hash_val = 0;
-	int M_Option = -1;
-	char f_name[100];//from user input
-	int conti = 1;
-	char Dir_Name[100];
-	int size;
 
-	Menu();
-	cout << endl;
-	cout << "Select Any Option: "; cin >> M_Option;
-	while (conti == 1)
-	{
-		switch (M_Option)
-		{
-		case 1:
-			cout << "Enter File Name to Create: "; fgets(f_name, sizeof(f_name), stdin);
-			fgets(f_name, sizeof(f_name), stdin);
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			Insert_File(f_name, hash_val);
-			break;
-		case 2:
-			cout << "Enter Directory Name: "; fgets(Dir_Name, sizeof(Dir_Name), stdin);
-			fgets(Dir_Name, sizeof(Dir_Name), stdin);
-			Insert_Dir(Dir_Name);
-			break;
-		case 3:
-			cout << "Enter File Name to Move: ";  fgets(f_name, sizeof(f_name), stdin);
-			fgets(f_name, sizeof(f_name), stdin);
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			cout << "Enter Directory Name To Move: "; fgets(Dir_Name, sizeof(Dir_Name), stdin);
-			Move_To_Dir(f_name, hash_val, Dir_Name);
-			break;
-		case 4:
-			cout << "Enter File Name to Change: ";  fgets(f_name, sizeof(f_name), stdin);
-			fgets(f_name, sizeof(f_name), stdin);
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			Edit_To_File(f_name, hash_val);
-			break;
-		case 5:
-			int from, to;
-			cout << "Enter File Name to Change: ";  fgets(f_name, sizeof(f_name), stdin);
-			fgets(f_name, sizeof(f_name), stdin);
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			cout << "Start Selection From(Position): "; cin >> from;
-			cout << "Limit Value To Be Changed "; cin >> size;
-			cout << "New Postion To Be Placed: "; cin >> to;
-			MoveContentWithinFile(f_name, from, to, size, hash_val);
-			break;
-		case 6:
-			cout << "Enter File Name to Delete: ";  fgets(f_name, sizeof(f_name), stdin);
-			fgets(f_name, sizeof(f_name), stdin);
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			Delete_File(f_name, hash_val);
-			break;
-		case 7:
-			cout << "Enter Position To Truncate File: "; cin >> size;
-			cout << "Enter File Name to Create: ";  fgets(f_name, sizeof(f_name), stdin);
-			fgets(f_name, sizeof(f_name), stdin);
-			hash_val = Hash_Value(f_name);//tested returns hash number remainder of 1024
-			TruncateFile(f_name, size, hash_val);
-			break;
-		case 8:
-			PrintMemoryMap();
-			break;
-		default:
-			cout << "Unavailable Option Selected." << endl;
-		}
-		system("pause");
-		cout << endl;
-		Menu();
-		cout << endl;
-		cout << "Select Any Option: "; cin >> M_Option;
-	}
+
+	
 	return 0;
 }
 
@@ -311,19 +364,27 @@ void Move_To_Dir(string file_name, int hash_val, string dir_name)
 	}
 	cout << "File or Directory Not Found." << endl << endl;
 }
-void Edit_To_File(string f_name, int hash_val)//for reading, editing file
+void Edit_To_File(string f_name, int hash_val,string text)//for reading, editing file
 {
 	int r_option = -1;
 	int w_option = -1;
 	int read_size = -1;
 	int option = -1;
-	cout << "Enter Option For 0.Read Or 1.Write: "; cin >> option;//option from user for read or write
+	// << "Enter Option For 0.Read Or 1.Write: "; cin >> option;//option from user for read or write
+	if (text == "r")
+		option = 0;
+	else if (text == "w")
+		option = 1;
+	else if (text != "r" && text != "w")
+		option = 1;
+
 	if (htable[hash_val].hnode->file_name == f_name)
 	{
 		if (option == 0)//for reading file
 		{
-			cout << "Enter Reading Option\n 0.Read Sequentially.\n 1.Reading Till Specific Size." << endl;
-			cin >> r_option;
+			//cout << "Enter Reading Option\n 0.Read Sequentially.\n 1.Reading Till Specific Size." << endl;
+			//cin >> r_option;
+			r_option = 0;
 			if (r_option == 0)//for reading sequentially
 			{
 				cout << "File Contents:" << endl;
@@ -348,16 +409,20 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 		}
 		else if (option == 1)//for writing to file
 		{
-			cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
-			cin >> w_option;
+			//cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
+			//cin >> w_option;
+			if (text == "w")
+				w_option = 2;
+			else
+				w_option = 1;
 
 			if (w_option == 1)//for overwriting file
 			{
-				cout << "Enter Data to write to file" << endl;
-				char str1[100];
-				fgets(str1, sizeof(str1), stdin);
-				fgets(str1, sizeof(str1), stdin);
-				htable[hash_val].hnode->data = str1;
+				//cout << "Enter Data to write to file" << endl;
+				//char str1[100];
+				//fgets(str1, sizeof(str1), stdin);
+				//fgets(str1, sizeof(str1), stdin);
+				htable[hash_val].hnode->data = text;
 			}
 			else if (w_option == 2)//for appending to file
 			{
@@ -381,8 +446,9 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 		{
 			if (option == 0)//for reading file
 			{
-				cout << "Enter Reading Option\n 1.Read Sequentially.\n 2.Reading Till Specific Size." << endl;
-				cin >> r_option;
+				//cout << "Enter Reading Option\n 0.Read Sequentially.\n 1.Reading Till Specific Size." << endl;
+			//cin >> r_option;
+				r_option = 0;
 				if (r_option == 0)//for reading sequentially
 				{
 					cout << "File Contents:" << endl;
@@ -409,16 +475,20 @@ void Edit_To_File(string f_name, int hash_val)//for reading, editing file
 			}
 			else if (option == 1)//for writing to file
 			{
-				cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
-				cin >> w_option;
+				//cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
+				//cin >> w_option;
+				if (text == "w")
+					w_option = 2;
+				else
+					w_option = 1;
 
 				if (w_option == 1)//for overwriting file
 				{
-					cout << "Enter Data to write to file" << endl;
-					char str1[100];
-					fgets(str1, sizeof(str1), stdin);
-					fgets(str1, sizeof(str1), stdin);
-					htable[hash_val].hnode->data = str1;
+					//cout << "Enter Data to write to file" << endl;
+					//char str1[100];
+					//fgets(str1, sizeof(str1), stdin);
+					//fgets(str1, sizeof(str1), stdin);
+					htable[hash_val].hnode->data = text;
 				}
 				else if (w_option == 2)//for appending to file
 				{
@@ -524,8 +594,8 @@ void PrintMemoryMap()
 					if (Htemp->dir->data == Dtemp->data)
 					{
 						memory = FileNames[i];
-						FileNames[i] = memory + Htemp->file_name + "  ";
-						cout << FileNames[i] << endl;
+						FileNames[i] = memory + Htemp->file_name + "(Text: " + Htemp->data + " )   ";
+						//cout << FileNames[i] << endl;
 							//"[" + to_string(Htemp->data.size()) + "]   ";
 					}
 						Htemp = Htemp->nptr;
@@ -553,4 +623,25 @@ void Menu()
 	cout << "---------------Menu----------------\n 1.Create A File.\n 2.Create Directory.\n 3.Move File To Directory\n";
 	cout << " 4.Open A File(For Read or Write).\n 5.Move Contents Within A File.\n 6.Delete A File.\n";
 	cout << " 7.Trucate a File.\n 8.Write Memory Map To File.\n";
+}
+
+
+int ConvertToOption(string command)
+{
+	if (command == "create")
+		return 1;
+	else if (command == "mkdir")
+		return 2;
+	else if (command == "move")
+		return 3;
+	else if (command == "open" || command == "write" || command == "read")
+		return 4;
+	else if (command == "mvcfile")
+		return 5;
+	else if (command == "delete")
+		return 6;
+	else if (command == "trunc")
+		return 7;
+	else if (command == "showmm")
+		return 8;
 }
