@@ -1,0 +1,10 @@
+create,file1.txt
+mkdir,dir3
+move,file1.txt,dir3
+write,file1.txt,MyNameIsAliAmirKhawaja.
+read,file1.txt,r
+create,file2.txt
+mvcfile,file1.txt,1,7,3
+write,file2.txt,123
+trunc,file1.txt,5
+showmm
