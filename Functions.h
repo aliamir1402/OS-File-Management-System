@@ -1,5 +1,20 @@
 #include "LinkedList.h"
 
+void wait(int* s)
+{
+	int x = 0;
+	while (*s <= 0)
+	{
+		if (x == 0)
+			cout << "\n\"In Writing Mode...Starts when in read mode.\" OR \"No Reader Is Present.\"" << endl << endl;
+		x++;
+	}
+	*s -= 1;
+}
+void signal(int* s)
+{
+	*s += 1;
+}
 //Functions to Create, Delete, Open, Edit, Move, Truncate File.
 void Delete_File(string f_name, int hash_val)
 {
@@ -8,7 +23,7 @@ void Delete_File(string f_name, int hash_val)
 		htable[hash_val].hnode->file_name = "*";
 		htable[hash_val].hnode->data = "*";
 		htable[hash_val].hnode->dir = temp_node;
-		cout << "File deleted Successfully." << endl;
+		cout << "\nFile deleted Successfully." << endl;
 	}
 	else
 	{
@@ -22,18 +37,18 @@ void Insert_File(string f_name, int hash_val)
 		if (htable[hash_val].hnode->file_name != f_name)
 		{
 			htable[hash_val].hnode->file_name = f_name;
-			cout << "File Created Successfully." << endl << endl;
+			cout << "\nFile Created Successfully." << endl << endl;
 		}
 		else
 		{
-			cout << "File Has A Repeatative Name." << endl << endl;
+			cout << "\nFile Has A Repeatative Name." << endl << endl;
 		}
 	}
 	else
 	{
 		if (htable[hash_val].hnode->file_name == f_name)
 		{
-			cout << "File Has A Repeatative Name." << endl << endl;
+			cout << "\nFile Has A Repeatative Name." << endl << endl;
 			return;
 		}
 		search_node = temp_node;
@@ -41,12 +56,12 @@ void Insert_File(string f_name, int hash_val)
 		if (search_node == temp_node)
 		{
 			htable[hash_val].insert(f_name, hash_val);
-			cout << "File Created Successfully." << endl << endl;
+			cout << "\nFile Created Successfully." << endl << endl;
 			htable[hash_val].hnode->nptr = htable[hash_val].start;
 		}
 		else
 		{
-			cout << "File Has A Repeatative Name." << endl << endl;
+			cout << "\nFile Has A Repeatative Name." << endl << endl;
 		}
 	}
 }
@@ -57,11 +72,11 @@ void Insert_Dir(string Dir_Name)
 	if (search_node == temp_node)
 	{
 		dlist->insert(Dir_Name, -1);
-		cout << "Directory Created Successfully." << endl << endl;
+		cout << "\nDirectory Created Successfully." << endl << endl;
 	}
 	else
 	{
-		cout << "Directory Has A Repeatative Name." << endl << endl;
+		cout << "\nDirectory Has A Repeatative Name." << endl << endl;
 	}
 }
 void Move_To_Dir(string file_name, int hash_val, string dir_name)
@@ -73,7 +88,7 @@ void Move_To_Dir(string file_name, int hash_val, string dir_name)
 		if (search_node != temp_node)
 		{
 			htable[hash_val].hnode->dir = search_node;
-			cout << "File changed and moved to " << htable[hash_val].hnode->dir->data << endl;
+			cout << "\nFile changed and moved to " << htable[hash_val].hnode->dir->data << endl;
 			return;
 		}
 	}
@@ -89,13 +104,13 @@ void Move_To_Dir(string file_name, int hash_val, string dir_name)
 			if (search_node != temp_node)
 			{
 				s_node->dir = search_node;
-				cout << "File changed and moved to " << s_node->dir->data << endl;
+				cout << "\nFile changed and moved to " << s_node->dir->data << endl;
 				cout << endl;
 				return;
 			}
 		}
 	}
-	cout << "File or Directory Not Found." << endl << endl;
+	cout << "\nFile or Directory Not Found." << endl << endl;
 }
 void Edit_To_File(string f_name, int hash_val, string text)//for reading, editing file
 {
@@ -113,35 +128,55 @@ void Edit_To_File(string f_name, int hash_val, string text)//for reading, editin
 
 	if (htable[hash_val].hnode->file_name == f_name)
 	{
+		//code for critical section
+
 		if (option == 0)//for reading file
 		{
+			wait(&mutex);
+			ReaderCount++;
+			if (ReaderCount > 0)
+				wait(&wtr);
+			signal(&mutex);
 			//cout << "Enter Reading Option\n 0.Read Sequentially.\n 1.Reading Till Specific Size." << endl;
 			//cin >> r_option;
 			r_option = 0;
 			if (r_option == 0)//for reading sequentially
 			{
-				cout << "File Contents:" << endl;
+				cout << "\nFile Contents:" << endl;
 				if (htable[hash_val].hnode->data != "*")
 					cout << htable[hash_val].hnode->data << endl;
 				else
-					cout << "Nothing In File." << endl;
+					cout << "\nNothing In File." << endl;
 				cout << endl;
 			}
 			else if (r_option == 1)//for reading till character point
 			{
 				if (htable[hash_val].hnode->data != "*")
 				{
-					cout << "Enter Size Till Read: " << endl;
+					cout << "\nEnter Size Till Read: " << endl;
 					cin >> read_size;
 					cout << htable[hash_val].hnode->data.substr(0, read_size) << endl;
 				}
 				else
-					cout << "Nothing In File." << endl;
+					cout << "\nNothing In File." << endl;
 				cout << endl;
 			}
+			cout << endl;
+			cout << "\nOnce done with reading..." << endl;
+			system("pause");
+
+			wait(&mutex);
+			ReaderCount--;
+			if (ReaderCount == 0)
+				signal(&wtr);
+			signal(&mutex);
 		}
 		else if (option == 1)//for writing to file
 		{
+			wait(&wtr);
+
+			//code for critical section
+
 			//cout << "Enter:\n 1.Write \n 2.Append\n" << endl;
 			//cin >> w_option;
 			if (text == "w")
@@ -159,12 +194,18 @@ void Edit_To_File(string f_name, int hash_val, string text)//for reading, editin
 			}
 			else if (w_option == 2)//for appending to file
 			{
-				cout << "Enter Data to append to file" << endl;
+				cout << "\nEnter Data to append to file" << endl;
 				char str2[100];
 				fgets(str2, sizeof(str2), stdin);
 				fgets(str2, sizeof(str2), stdin);
 				htable[hash_val].hnode->data = htable[hash_val].hnode->data + str2;
 			}
+
+			cout << endl;
+			cout << "\nOnce done with Writing..." << endl;
+			system("pause");
+
+			signal(&wtr);
 		}
 	}
 	else//check chained list
@@ -175,36 +216,56 @@ void Edit_To_File(string f_name, int hash_val, string text)//for reading, editin
 
 		search_node = temp_node;
 		htable[hash_val].search(f_name);//assigns search_node with the address of searched file_name
+
+
 		if (search_node != temp_node)//if file is not empty
 		{
 			if (option == 0)//for reading file
 			{
 				//cout << "Enter Reading Option\n 0.Read Sequentially.\n 1.Reading Till Specific Size." << endl;
 			//cin >> r_option;
+
+				wait(&mutex);
+				ReaderCount++;
+				if (ReaderCount > 0)
+				{
+					wait(&wtr);
+				}
+				signal(&mutex);
+
 				r_option = 0;
 				if (r_option == 0)//for reading sequentially
 				{
-					cout << "File Contents:" << endl;
+					cout << "\nFile Contents:" << endl;
 					if (search_node->data != "*")
 						cout << search_node->data << endl;
 					else
-						cout << "Nothing In File." << endl;
+						cout << "\nNothing In File." << endl;
 					cout << endl;
 				}
 				else if (r_option == 1)//for reading till character point
 				{
-					cout << "Enter Size Till Read: " << endl;
+					cout << "\nEnter Size Till Read: " << endl;
 					cin >> read_size;
 					if (search_node->data != "*")
 					{
-						cout << "Enter Size Till Read: " << endl;
+						cout << "\nEnter Size Till Read: " << endl;
 						cin >> read_size;
 						cout << search_node->data.substr(0, read_size) << endl;
 					}
 					else
-						cout << "Nothing In File." << endl;
+						cout << "\nNothing In File." << endl;
 					cout << endl;
 				}
+				cout << endl;
+				cout << "\nOnce done with reading..." << endl;
+				system("pause");
+
+				wait(&mutex);
+				ReaderCount--;
+				if (ReaderCount == 0)
+					signal(&wtr);
+				signal(&mutex);
 			}
 			else if (option == 1)//for writing to file
 			{
@@ -215,6 +276,7 @@ void Edit_To_File(string f_name, int hash_val, string text)//for reading, editin
 				else
 					w_option = 1;
 
+				wait(&wtr);
 				if (w_option == 1)//for overwriting file
 				{
 					//cout << "Enter Data to write to file" << endl;
@@ -225,12 +287,18 @@ void Edit_To_File(string f_name, int hash_val, string text)//for reading, editin
 				}
 				else if (w_option == 2)//for appending to file
 				{
-					cout << "Enter Data to append to file" << endl;
+					cout << "\nEnter Data to append to file" << endl;
 					char str2[100];
 					fgets(str2, sizeof(str2), stdin);
 					fgets(str2, sizeof(str2), stdin);
 					htable[hash_val].hnode->data = htable[hash_val].hnode->data + str2;
 				}
+
+				cout << endl;
+				cout << "\nOnce done with Writing..." << endl;
+				system("pause");
+
+				signal(&wtr);
 			}
 		}
 	}
@@ -245,7 +313,7 @@ void MoveContentWithinFile(string f_name, int from, int to, int size, int hash_v
 			htable[hash_val].hnode->data.substr(size + 1, htable[hash_val].hnode->data.length());
 		htable[hash_val].hnode->data = htable[hash_val].hnode->data.substr(0, to) + temp_str +
 			htable[hash_val].hnode->data.substr(to + 1, htable[hash_val].hnode->data.length());
-		cout << "File Edited Successfully" << endl << endl;
+		cout << "\nFile Edited Successfully" << endl << endl;
 	}
 	else
 	{
@@ -258,7 +326,7 @@ void MoveContentWithinFile(string f_name, int from, int to, int size, int hash_v
 				search_node->data.substr(size + 1, search_node->data.length());
 			search_node->data = search_node->data.substr(0, to) + temp_str +
 				search_node->data.substr(to + 1, search_node->data.length());
-			cout << "File Edited Successfully" << endl << endl;
+			cout << "\nFile Edited Successfully" << endl << endl;
 		}
 	}
 }
@@ -267,7 +335,7 @@ void TruncateFile(string f_name, int size, int hash_val)
 	if (htable[hash_val].hnode->file_name == f_name)
 	{
 		htable[hash_val].hnode->data = htable[hash_val].hnode->data.substr(0, size);
-		cout << "File Truncated." << endl << endl;
+		cout << "\nFile Truncated." << endl << endl;
 	}
 	else
 	{
@@ -276,7 +344,7 @@ void TruncateFile(string f_name, int size, int hash_val)
 		if (search_node != temp_node)
 		{
 			search_node->data = search_node->data.substr(0, size);
-			cout << "File Truncated." << endl << endl;
+			cout << "\nFile Truncated." << endl << endl;
 		}
 	}
 }
@@ -359,6 +427,7 @@ void PrintMemoryMap()
 	MyFile.close();
 }
 
+
 //Options/Services Available
 void Menu()
 {
@@ -386,6 +455,8 @@ int ConvertToOption(string command)
 		return 7;
 	else if (command == "showmm")
 		return 8;
+	else if (command == "close")
+		;
 }
 void thread_function()
 {
@@ -404,7 +475,7 @@ void thread_function()
 
 	//maintain counter for threads
 	cout << endl;
-	cout << "Thread Currently Running: " << ++thread_count << endl << endl;
+	cout << "\nThread Currently Running: " << ++thread_count << endl << endl;
 
 	fstream  afile;
 	if (thread_count == 1)
@@ -414,14 +485,14 @@ void thread_function()
 	else if (thread_count == 3)
 		afile.open("command3.txt", ios::in);
 
-	cout << "Home directory created." << endl;
+	cout << "\nHome directory created." << endl;
 	Insert_Dir("home");
 
 	do
 	{
-		afile >> line;
+		afile >> line; 
 		count++;
-		cout << "------------------------Command: " << count << "---------------------------" << endl;
+		cout << "\n------------------------Command: " << count << "---------------------------" << endl;
 		cout << "Line: " << line << endl;
 		word = strtok_s(line, ",", &next_token1);
 		//cout << "Line: " << word << endl << endl;
@@ -500,7 +571,7 @@ void thread_function()
 			PrintMemoryMap();
 			break;
 		default:
-			cout << "Unavailable Option Selected." << endl;
+			cout << "\nUnavailable Option Selected." << endl;
 		}
 		//system("pause");
 		//cout << endl;

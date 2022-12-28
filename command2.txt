@@ -6,9 +6,4 @@ move,file3.txt,dir2
 move,file2.txt,dir1
 write,file2.txt,File2Contents
 read,file2.txt,r
-create,file4.txt
-mvcfile,file2.txt,1,7,3
-move,file4.txt,dir1
-write,file3.txt,File3Contents
-trunc,file2.txt,6
 showmm

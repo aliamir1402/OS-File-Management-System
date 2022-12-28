@@ -1,8 +1,8 @@
-home: file2.txt(Text: Fteile2Conts )   
+home: 
 -----
-dir3: file1.txt(Text: MAlyNameIsAmirKhawaja. )   
+home: 
 -----
-dir1: file4.txt(Text: File4Contents )   
+dir1: file2.txt(Text: File2Contents )   
 -----
-dir2: file3.txt(Text: File3Contents )   file5.txt(Text: HldelloWororld )   
+dir2: file3.txt(Text: * )   
 -----

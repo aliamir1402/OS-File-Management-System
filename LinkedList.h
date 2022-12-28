@@ -1,17 +1,19 @@
-#include <iostream>
-#include <string.h>
-#include<string>
-#include <fstream>
-#include <cstring>
-#include <thread>
-#include<windows.h>       
-#include <time.h>
+#include <iostream> //standard libary for c++
+#include<string>    //libary for string handling functionality
+#include <fstream>  //libary for file handling 
+#include <cstring>  //libary for string handling functionality
+#include <thread>   //library for creating threads
+#include<windows.h> //implementing general functions
+#include <time.h>   //for finding execution time of the program
 using namespace std;
 
 #define MAX_THREAD 3
 
 int thread_count = 0;
 int flag[MAX_THREAD] = { 0 };
+int mutex = 1;//initialized as reader semaphore
+int wtr = 1;//initialized as reader semaphore
+int ReaderCount = 0;
 
 class node
 {

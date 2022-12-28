@@ -1,13 +1,1 @@
-create,file4.txt
-create,file5.txt
-mkdir,dir1
-mkdir,dir2
-move,file5.txt,dir2
-move,file4.txt,dir1
-write,file5.txt,HelloWorldWorld
-read,file5.txt,r
-create,file2.txt
-mvcfile,file5.txt,1,7,3
-showmm
-write,file4.txt,File4Contents
-showmm
+-
